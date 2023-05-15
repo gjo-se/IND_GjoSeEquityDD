@@ -25,13 +25,18 @@
 
 #property indicator_separate_window
 
-#property indicator_buffers   1
-#property indicator_plots     1
+#property indicator_buffers   2
+#property indicator_plots     2
 
 #property indicator_type1     DRAW_LINE
 #property indicator_color1    clrBlack
 #property indicator_width1    2
 #property indicator_label1  "EquityDD"
+
+#property indicator_type2     DRAW_LINE
+#property indicator_color2    clrRed
+#property indicator_width2    2
+#property indicator_label2  "EquityDD-Dynamic"
 
 #property indicator_minimum 0
 #property indicator_maximum 60
@@ -40,20 +45,23 @@ input double InpMaxEquityDD = 20;
 input double InpMaxEquityDD_OutAndStop = 30;
 
 double EquityDDBuffer[];
+double EquityDDDynamicBuffer[];
 
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 void OnInit() {
    SetIndexBuffer(0, EquityDDBuffer, INDICATOR_DATA);
+   SetIndexBuffer(1, EquityDDDynamicBuffer, INDICATOR_DATA);
+
    PlotIndexSetInteger(1, PLOT_DRAW_BEGIN, 0);
 
    IndicatorSetInteger(INDICATOR_LEVELS,2);
    IndicatorSetInteger(INDICATOR_LEVELCOLOR, clrRed);
-   IndicatorSetInteger(INDICATOR_LEVELSTYLE, STYLE_SOLID);
+
    IndicatorSetDouble(INDICATOR_LEVELVALUE, 0, InpMaxEquityDD);
-   IndicatorSetDouble(INDICATOR_LEVELVALUE, 1, InpMaxEquityDD_OutAndStop);
    IndicatorSetString(INDICATOR_LEVELTEXT, 0, NormalizeDouble(DoubleToString(InpMaxEquityDD), 2) + "% EquityDD");
+   IndicatorSetDouble(INDICATOR_LEVELVALUE, 1, InpMaxEquityDD_OutAndStop);
    IndicatorSetString(INDICATOR_LEVELTEXT, 1, NormalizeDouble(DoubleToString(InpMaxEquityDD_OutAndStop), 2) + "% Equity DD");
 
    string short_name = "EquityDD";
@@ -85,9 +93,10 @@ int OnCalculate(const int pRatesTotal,
       EquityDDBuffer[i] = getRelativeEquityDD(EQUITY_DD_PERCENT);
 
       if(i > 1) {
-         if(EquityDDBuffer[i - 2] < InpMaxEquityDD && EquityDDBuffer[i - 1] > InpMaxEquityDD) {
-            //createVLine(__FUNCTION__ + IntegerToString(time[i - 1]), time[i - 1], clrGreen, 2);
-         }
+      EquityDDDynamicBuffer[i] = EquityDDBuffer[i] - EquityDDBuffer[i - 1];
+//         if(EquityDDBuffer[i - 2] < InpMaxEquityDD && EquityDDBuffer[i - 1] > InpMaxEquityDD) {
+//            //createVLine(__FUNCTION__ + IntegerToString(time[i - 1]), time[i - 1], clrGreen, 2);
+//         }
       }
 
 
